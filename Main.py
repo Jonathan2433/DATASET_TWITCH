@@ -1,5 +1,6 @@
 import csv
 import traceback
+import re
 
 # ouverture et transformation du fichier en list
 def open_file(file):
@@ -15,6 +16,7 @@ def real_streams(data):
         try:
             minutes_streamed = float(row[13])
             if minutes_streamed != 0:
+                # isolation du nombre de stream
                 real_streams.append(row)
         except Exception:
             print("Probleme lors de la conversion en Integer !", str(Exception), str(traceback.print_exc()))
@@ -25,6 +27,7 @@ def average_viewers_total(data):
     for stream in data:
         try:
             average_viewers = float(stream[3])
+            # cumul des viewers moyen
             total_average_viewers += average_viewers
         except Exception:
             print("Probleme lors de la conversion en Float !", str(Exception), str(traceback.print_exc()))
@@ -32,13 +35,13 @@ def average_viewers_total(data):
 
 def unique_viewers_total(data):
     total_unique_viewers = 0
-    print(data[0])
     for stream in data:
         try:
             minutes_streamed = float(stream[13])
-            print(type(minutes_streamed))
+            # verification si il y as bien eu un live
             if minutes_streamed != 0:
                 unique_viewers = int(stream[14])
+                # cumul des viewers unique
                 total_unique_viewers += unique_viewers
         except Exception:
             print("Probleme lors de la conversion en Integer !", str(Exception), str(traceback.print_exc()))
@@ -48,6 +51,18 @@ def display_data(data):
     month_data = []
     for i, stream in enumerate(data):
         streams = real_streams(stream)
+        monday_streams = []
+        #isolement des streams du lundi soir
+        if re.match("^[Mon]", streams[0][0]):
+            monday_streams.append(streams)
+            # nombre de stream le lundi soir durant le mois
+            total_streams_monday = len(monday_streams)
+            # nombre total de viewers moyen sur les lundis durant le mois
+            total_average_viewers_monday = average_viewers_total(monday_streams)
+            # viewers moyen le lundi sur le mois
+            average_viewers_monday = total_average_viewers_monday / total_streams_monday
+            # nombre total de viewers unique le lundi sur le mois
+            total_unique_viewers_monday = unique_viewers_total(monday_streams)
         # nombre de stream durant le mois
         total_streams_month = len(streams)
         # nombre total de viewers moyen sur le mois
@@ -56,8 +71,10 @@ def display_data(data):
         average_viewers_month = total_average_viewers_month / total_streams_month
         # nombre total de viewers unique sur le mois
         total_unique_viewers_month = unique_viewers_total(streams)
-        month_data.extend([str(i +1) + " mois ", str(average_viewers_month) + ", Viewers moyen, et " + str(total_unique_viewers_month) + ", Viewers unique pour " + str(total_streams_month) + ", Streams "])
-    return month_data
+        # todo
+        # return result for monday stream
+        month_data.extend(["fichier numéro : " +str(i +1) , str(average_viewers_month) + ", Viewers moyen, et, " + str(total_unique_viewers_month) + ", Viewers unique pour, " + str(total_streams_month) + ", Streams "])
+    return
 
 
 
@@ -70,123 +87,8 @@ data_second_tech_month = open_file("2eme mois tech.csv")
 
 data_all_month = [data_first_month, data_second_month, data_third_month, data_first_tech_month, data_second_tech_month]
 
-info_data = open("1er mois.csv", "r")
-info_data = csv.reader(info_data)
-info = list(info_data)
-infos = info[0]
+infos = data_first_month[0]
 
-for i, info in enumerate(infos):
-    print(i, info)
-#
-#
-# # traitements pour le premier mois de stream
-#
-# # nettoyage des datas
-# first_month_streams = real_streams(data_first_month)
-# # nombre de stream durant le mois
-# total_streams_first_month = len(first_month_streams)
-# # nombre total de viewers moyen sur le mois
-# total_average_viewers_first_month = average_viewers_total(first_month_streams)
-# # viewers moyen sur le mois
-# average_viewers_first_month = total_average_viewers_first_month / total_streams_first_month
-# # nombre total de viewers unique sur le mois
-# total_unique_viewers_first_month = unique_viewers_total(first_month_streams)
-#
-# # traitements pour le second mois de stream
-#
-# # nettoyage des datas
-# second_month_streams = real_streams(data_second_month)
-# # nombre de stream durant le mois
-# total_streams_second_month = len(second_month_streams)
-# # nombre total de viewers moyen sur le mois
-# total_average_viewers_second_month = average_viewers_total(second_month_streams)
-# # viewers moyen sur le mois
-# average_viewers_second_month = total_average_viewers_second_month / total_streams_second_month
-# # nombre total de viewers unique sur le mois
-# total_unique_viewers_second_month = unique_viewers_total(second_month_streams)
-#
-# # traitements pour le troisieme mois de stream
-#
-# # nettoyage des datas
-# third_month_streams = real_streams(data_third_month)
-# # nombre de stream durant le mois
-# total_streams_third_month = len(third_month_streams)
-# # nombre total de viewers moyen sur le mois
-# total_average_viewers_third_month = average_viewers_total(first_month_streams)
-# # viewers moyen sur le mois
-# average_viewers_third_month = total_average_viewers_third_month / total_streams_third_month
-# # nombre total de viewers unique sur le mois
-# total_unique_viewers_third_month = unique_viewers_total(third_month_streams)
-#
-# # traitements pour le premier mois de stream tech
-#
-# # nettoyage des datas
-# first_month_tech_streams = real_streams(data_first_tech_month)
-# # nombre de stream durant le mois
-# total_streams_first_tech_month = len(first_month_tech_streams)
-# # nombre total de viewers moyen sur le mois
-# total_average_viewers_first_tech_month = average_viewers_total(first_month_streams)
-# # viewers moyen sur le mois
-# average_viewers_first_tech_month  = total_average_viewers_first_tech_month / total_streams_first_tech_month
-# # nombre total de viewers unique sur le mois
-# total_unique_viewers_first_tech_month = unique_viewers_total(first_month_tech_streams)
-#
-# # traitements pour le second mois de stream tech
-#
-# # nettoyage des datas
-# second_month_tech_streams = real_streams(data_second_tech_month)
-# # nombre de stream durant le mois
-# total_streams_second_tech_month = len(second_month_tech_streams)
-# # nombre total de viewers moyen sur le mois
-# total_average_viewers_second_tech_month = average_viewers_total(first_month_streams)
-# # viewers moyen sur le mois
-# average_viewers_second_tech_month = total_average_viewers_second_tech_month / total_streams_second_tech_month
-# # nombre total de viewers unique sur le mois
-# total_unique_viewers_second_tech_month = unique_viewers_total(second_month_tech_streams)
-#
-# print(str(total_streams_first_month) + " Streams", str(total_streams_second_month) + " Streams", str(total_streams_third_month) + " Streams", str(total_streams_first_tech_month) + " Streams", str(total_streams_second_tech_month) + " Streams")
-# print(infos)
-# print("-"*50)
-# print(str(average_viewers_first_month) + " Viewers moyen sur le 1er mois de stream")
-# print(str(total_unique_viewers_first_month) + " viewers unique sur")
-# print("-"*50)
-# print(str(average_viewers_second_month) + " Viewers moyen sur le 2eme mois de stream")
-# print(str(total_unique_viewers_second_month) + " viewers unique sur")
-# print("-"*50)
-# print(str(average_viewers_third_month) + " Viewers moyen sur le 3eme mois de stream")
-# print(str(total_unique_viewers_third_month) + " viewers unique sur")
-# print("-"*50)
-# print(str(average_viewers_first_tech_month) + " Viewers moyen sur le 1er mois de stream Tech")
-# print(str(total_unique_viewers_first_tech_month) + " viewers unique sur")
-# print("-"*50)
-# print(str(average_viewers_second_tech_month) + " Viewers moyen sur le 2eme mois de stream Tech")
-# print(str(total_unique_viewers_second_tech_month) + " viewers unique sur")
-# print("-"*50)
-#
-#
-
-# print(len(real_streams(data_first_month)))
-# print(average_viewers_total(data_first_month))
-# print(average_viewers_total(data_first_month) / len(real_streams(data_first_month)))
-# print(len(real_streams(data_second_month)))
-# print(average_viewers_total(data_second_month))
-# print(average_viewers_total(data_second_month) / len(real_streams(data_second_month)))
-# print(len(real_streams(data_third_month)))
-# print(average_viewers_total(data_third_month))
-# print(average_viewers_total(data_third_month) / len(real_streams(data_third_month)))
-# print(len(real_streams(data_first_tech_month)))
-# print(average_viewers_total(data_first_tech_month))
-# print(average_viewers_total(data_first_tech_month) / len(real_streams(data_first_tech_month)))
-# print(len(real_streams(data_second_tech_month)))
-# print(average_viewers_total(data_second_tech_month))
-# print(average_viewers_total(data_second_tech_month) / len(real_streams(data_second_tech_month)))
-
-
-# print(len(real_streams(data_first_month)))
-# print(average_viewers_total(data_first_month))
-# print(average_viewers_total(data_first_month) / len(real_streams(data_first_month)))
-# print("-"*500)
-#
 display_data = display_data(data_all_month)
 
 for month in display_data:
